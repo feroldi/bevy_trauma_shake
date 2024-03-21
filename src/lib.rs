@@ -66,6 +66,8 @@ impl Plugin for TraumaPlugin {
 pub struct ShakeSettings {
     /// the amplitude of the shake, how far it can offset
     pub amplitude: f32,
+    /// the amplitude of the rotation shake, how far it can spin
+    pub max_roll: f32,
     /// normally in the 2-3 range, a high power makes low traumas less intense
     pub trauma_power: f32,
     /// how much trauma is reduced each second
@@ -87,6 +89,7 @@ impl ShakeSettings {
         trauma_power: 2.,
         decay_per_second: 0.8,
         amplitude: 100.,
+        max_roll: 0.1,
         frequency: 15.,
         octaves: 1,
     };
@@ -149,7 +152,7 @@ fn shake(mut shakes: Query<(&mut Shake, &mut Transform, Option<&ShakeSettings>)>
             EulerRot::YXZ,
             0.0,
             0.0,
-            settings.amplitude
+            settings.max_roll
                 * trauma_amount
                 * fbm_simplex_2d(noise_pos + vec2(0., 1.), settings.octaves, lacunarity, gain),
         );
