@@ -101,6 +101,7 @@ impl ShakeSettings {
 pub struct Shake {
     trauma: f32,
     reference_translation: Option<Vec3>,
+    reference_rotation: Option<Quat>,
 }
 
 impl Shake {
@@ -132,6 +133,7 @@ fn shake(mut shakes: Query<(&mut Shake, &mut Transform, Option<&ShakeSettings>)>
         }
 
         shake.reference_translation = Some(transform.translation);
+        shake.reference_rotation = Some(transform.rotation);
 
         let lacunarity = 2.;
         let gain = 0.5;
@@ -143,8 +145,18 @@ fn shake(mut shakes: Query<(&mut Shake, &mut Transform, Option<&ShakeSettings>)>
                 fbm_simplex_2d(noise_pos + vec2(0., 2.), settings.octaves, lacunarity, gain),
             );
 
+        let shake_rotation = Quat::from_euler(
+            EulerRot::YXZ,
+            0.0,
+            0.0,
+            settings.amplitude
+                * trauma_amount
+                * fbm_simplex_2d(noise_pos + vec2(0., 1.), settings.octaves, lacunarity, gain),
+        );
+
         transform.translation.x += offset.x;
         transform.translation.y += offset.y;
+        transform.rotation = shake_rotation;
     }
 }
 
@@ -154,6 +166,11 @@ fn restore(mut shakes: Query<(&mut Shake, &mut Transform)>) {
         if shake.reference_translation.is_some() {
             let translation = shake.reference_translation.take().unwrap();
             transform.translation = translation;
+        }
+
+        if shake.reference_rotation.is_some() {
+            let rotation = shake.reference_rotation.take().unwrap();
+            transform.rotation = rotation;
         }
     }
 }
