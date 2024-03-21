@@ -156,7 +156,7 @@ fn shake(mut shakes: Query<(&mut Shake, &mut Transform, Option<&ShakeSettings>)>
 
         transform.translation.x += offset.x;
         transform.translation.y += offset.y;
-        transform.rotation = shake_rotation;
+        transform.rotation = transform.rotation + shake_rotation;
     }
 }
 
